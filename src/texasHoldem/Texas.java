@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.Vector;
 
 public class Texas {
 
@@ -16,12 +17,7 @@ public class Texas {
 		None, High_Card, Pair, Two_Pairs, Three_of_a_Kind, Straight, Flush, Full_House, Four_of_a_Kind, Straight_Flush;
 	}
 	
-//	public static void main(String[] args) {
-//		Texas texas = new Texas();
-//		texas.judge("2S 8S AS QS 3S");
-//	}
-	
-	public Map<cardType, ArrayList<Integer>> judge(String str) {
+	public Vector<Object> judge(String str) {
 
 		String[] strSplit = str.split(" ");
 		Integer[] numarr = new Integer[strSplit.length];
@@ -78,11 +74,11 @@ public class Texas {
 			
 			index++;
 			
-//			System.out.println("Key: " + entry.getKey() + "\tValue: " + entry.getValue());
-		}
+		}		
 		
-		Map<cardType, ArrayList<Integer>> result = new TreeMap<cardType, ArrayList<Integer>>();
-		result.put(type, compareArray);
+		Vector<Object> result = new Vector<Object>(2);
+		result.addElement(type);
+		result.addElement(compareArray);
 		
 		return result;
 	}
@@ -124,26 +120,23 @@ public class Texas {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public String compare(String black, String white) {
 
 		String result = "";
 		
-		Map<cardType, ArrayList<Integer>> blackResult = judge(black);
-		Map<cardType, ArrayList<Integer>> whiteResult = judge(white);
+		Vector<Object> blackResult = judge(black);
+		Vector<Object> whiteResult = judge(white);
 		
 		cardType blackCardType = cardType.None;
 		ArrayList<Integer> blackCompareArrayList = new ArrayList<Integer>();
 		cardType whiteCardType = cardType.None;
-		ArrayList<Integer> whiteCompareArrayList = new ArrayList<Integer>();
+		ArrayList<Integer> whiteCompareArrayList = new ArrayList<Integer>();		
 		
-		for (Map.Entry<cardType, ArrayList<Integer>> entry : blackResult.entrySet()) {
-        	blackCardType = entry.getKey();
-        	blackCompareArrayList = entry.getValue();
-        }		
-		for (Map.Entry<cardType, ArrayList<Integer>> entry : whiteResult.entrySet()) {
-        	whiteCardType = entry.getKey();
-        	whiteCompareArrayList = entry.getValue();
-        }
+    	blackCardType = (cardType) blackResult.elementAt(0);
+    	blackCompareArrayList = (ArrayList<Integer>) blackResult.elementAt(1);
+    	whiteCardType = (cardType) whiteResult.elementAt(0);
+    	whiteCompareArrayList = (ArrayList<Integer>) whiteResult.elementAt(1);
 		
 		if (blackCardType == cardType.None || whiteCardType == cardType.None || blackCompareArrayList.size() == 0 || whiteCompareArrayList.size() == 0) {
 			return "error!";
