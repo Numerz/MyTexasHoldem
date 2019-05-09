@@ -13,21 +13,47 @@ import java.util.Vector;
 
 public class Texas {
 
+	public static int maxCardSize = 5;
+	
 	public enum cardType {
 		None, High_Card, Pair, Two_Pairs, Three_of_a_Kind, Straight, Flush, Full_House, Four_of_a_Kind, Straight_Flush;
 	}
 	
 	public Vector<Object> judge(String str) {
 
+		boolean straightFlag = false;
+		
 		String[] strSplit = str.split(" ");
 		Integer[] numarr = new Integer[strSplit.length];
+		Character[] suitArr = new Character[strSplit.length];
 		
+		//	make numarr
 		int index = 0;
 		for (String string : strSplit) {
 			 char rawChar = string.toCharArray()[0];
 			 Integer cookedChar = ConvertLetterTONum(rawChar);
 			 numarr[index] = cookedChar;
 			index++;
+		}
+		
+		// make suitArr
+		index = 0;
+		for (String string : strSplit) {
+			 char rawChar = string.toCharArray()[1];
+			 suitArr[index] = rawChar;
+			index++;
+		}
+		
+		// find straight
+		char baseChar = suitArr[0];
+		for (int i = 1; i < suitArr.length; i++) {
+			if (suitArr[i] != baseChar) {
+				break;
+			}
+			// 5 cards are the same suit
+			if (i == suitArr.length-1) {
+				straightFlag = true;
+			}
 		}
 		
 		//map集合，key为字符，value为个数
@@ -46,39 +72,70 @@ public class Texas {
 
 		index = 1;
 		int maxNum = 0;
-		int maxKey = 0;
+		boolean endFlag = false;
+		int lastCard = 0;
 		ArrayList<Integer> compareArray = new ArrayList<>();
+		ArrayList<Integer> secondArray = new ArrayList<>();
 		cardType type = cardType.None;
 		
 		for (Entry<Integer, Integer> entry : map.entrySet()) {
 			if (index == 1) {
 				maxNum = entry.getValue();
-				maxKey = entry.getKey();
+				lastCard = entry.getKey();
 			}
-			if (entry.getValue() == 4 &&maxNum == 4) {
+			if (entry.getValue() == maxNum) {
+				compareArray.add(entry.getKey());
+			}else{
+				secondArray.add(entry.getKey());
+			}
+			
+			if (maxNum == 4) {
 				type = cardType.Four_of_a_Kind;
-				compareArray.add(maxKey);
 			}
 			if (entry.getValue() == 2 && maxNum == 3) {
 				type = cardType.Full_House;
-				compareArray.add(maxKey);
 			}
 			if (entry.getValue() == 1 && maxNum == 3) {
 				type = cardType.Three_of_a_Kind;
-				compareArray.add(entry.getKey());
+			}
+			if (entry.getValue() == 1 && maxNum == 2) {
+				if (index == 2 && endFlag == false) {
+					type = cardType.Pair;
+					endFlag = true;
+				}
+				if (index == 3 && endFlag == false) {
+					type = cardType.Two_Pairs;
+					endFlag = true;
+				}
 			}
 			if (entry.getValue() == 1 && maxNum == 1) {
-				type = cardType.High_Card;
-				compareArray.add(entry.getKey());
+				if (index > 1 && entry.getKey() != lastCard+1) {
+					type = cardType.High_Card;					
+				}
+				if (index != 1 && entry.getKey() == lastCard+1) {
+					lastCard = entry.getKey();
+				}
+				if (index == maxCardSize && entry.getKey() == lastCard) {
+					if (straightFlag) {
+						type = cardType.Straight_Flush;												
+					}else {
+						type = cardType.Flush;
+					}
+				}
 			}
 			
 			index++;
 			
-		}		
+		}
+		
+		if (type != cardType.Straight_Flush && straightFlag) {
+			type = cardType.Straight;
+		}
 		
 		Vector<Object> result = new Vector<Object>(2);
 		result.addElement(type);
 		result.addElement(compareArray);
+		result.addElement(secondArray);
 		
 		return result;
 	}
@@ -130,13 +187,17 @@ public class Texas {
 		
 		cardType blackCardType = cardType.None;
 		ArrayList<Integer> blackCompareArrayList = new ArrayList<Integer>();
+		ArrayList<Integer> blackSecondArrayList = new ArrayList<Integer>();
 		cardType whiteCardType = cardType.None;
-		ArrayList<Integer> whiteCompareArrayList = new ArrayList<Integer>();		
+		ArrayList<Integer> whiteCompareArrayList = new ArrayList<Integer>();	
+		ArrayList<Integer> whiteSecondArrayList = new ArrayList<Integer>();
 		
     	blackCardType = (cardType) blackResult.elementAt(0);
     	blackCompareArrayList = (ArrayList<Integer>) blackResult.elementAt(1);
+    	blackSecondArrayList = (ArrayList<Integer>) blackResult.elementAt(2);
     	whiteCardType = (cardType) whiteResult.elementAt(0);
     	whiteCompareArrayList = (ArrayList<Integer>) whiteResult.elementAt(1);
+    	whiteSecondArrayList = (ArrayList<Integer>) whiteResult.elementAt(2);
 		
 		if (blackCardType == cardType.None || whiteCardType == cardType.None || blackCompareArrayList.size() == 0 || whiteCompareArrayList.size() == 0) {
 			return "error!";
@@ -145,9 +206,18 @@ public class Texas {
 		Integer[] blackArr = new Integer[blackCompareArrayList.size()];
 		blackCompareArrayList.toArray(blackArr);
 		Arrays.sort(blackArr);
+		
+		Integer[] blackSecondArr = new Integer[blackSecondArrayList.size()];
+		blackSecondArrayList.toArray(blackSecondArr);
+		Arrays.sort(blackSecondArr);
+		
 		Integer[] whiteArr = new Integer[whiteCompareArrayList.size()];
 		whiteCompareArrayList.toArray(whiteArr);
 		Arrays.sort(whiteArr);
+		
+		Integer[] whiteSecondArr = new Integer[whiteSecondArrayList.size()];
+		whiteSecondArrayList.toArray(whiteSecondArr);
+		Arrays.sort(whiteSecondArr);
 		
 		if (blackCardType.compareTo(whiteCardType) < 0) {
 			result += "White wins - ";
@@ -172,6 +242,23 @@ public class Texas {
 					result += convertNumToCard(whiteArr[iterNum]);
 					endFlag = true;
 					break;
+				}
+			}
+			if (!endFlag) {
+				int iterNum2 = blackSecondArr.length;
+				while(iterNum2-- > 0){
+					if (blackSecondArr[iterNum2] > whiteSecondArr[iterNum2]) {
+						result += "Black wins - high card: ";
+						result += convertNumToCard(blackSecondArr[iterNum2]);
+						endFlag = true;
+						break;
+					}
+					else if (blackSecondArr[iterNum2] < whiteSecondArr[iterNum2]) {
+						result += "White wins - high card: ";
+						result += convertNumToCard(whiteSecondArr[iterNum2]);
+						endFlag = true;
+						break;
+					}
 				}
 			}
 			if (!endFlag) {
