@@ -1,5 +1,7 @@
 # MyTexasHoldem
 
+注：此程序输出的类型单词首字母全为大写（High Card, Pair, Two Pairs, Three of a Kind, Straight, Flush, Full House, Four of a Kind, Straight Flush）
+
 中文版
 
 一副扑克有52张牌，每张牌由一个花色和一个数字构成。
