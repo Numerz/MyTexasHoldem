@@ -232,13 +232,17 @@ public class Texas {
 			boolean endFlag = false;
 			while(iterNum-- > 0){
 				if (blackArr[iterNum] > whiteArr[iterNum]) {
-					result += "Black wins - high card: ";
+					result += "Black wins - ";
+					result += blackCardType.toString().replace('_', ' ');
+					result += ": ";
 					result += convertNumToCard(blackArr[iterNum]);
 					endFlag = true;
 					break;
 				}
 				else if (blackArr[iterNum] < whiteArr[iterNum]) {
-					result += "White wins - high card: ";
+					result += "White wins - ";
+					result += whiteCardType.toString().replace('_', ' ');
+					result += ": ";
 					result += convertNumToCard(whiteArr[iterNum]);
 					endFlag = true;
 					break;
@@ -248,13 +252,17 @@ public class Texas {
 				int iterNum2 = blackSecondArr.length;
 				while(iterNum2-- > 0){
 					if (blackSecondArr[iterNum2] > whiteSecondArr[iterNum2]) {
-						result += "Black wins - high card: ";
+						result += "Black wins - ";
+						result += blackCardType.toString().replace('_', ' ');
+						result += ": ";
 						result += convertNumToCard(blackSecondArr[iterNum2]);
 						endFlag = true;
 						break;
 					}
 					else if (blackSecondArr[iterNum2] < whiteSecondArr[iterNum2]) {
-						result += "White wins - high card: ";
+						result += "White wins - ";
+						result += whiteCardType.toString().replace('_', ' ');
+						result += ": ";
 						result += convertNumToCard(whiteSecondArr[iterNum2]);
 						endFlag = true;
 						break;
